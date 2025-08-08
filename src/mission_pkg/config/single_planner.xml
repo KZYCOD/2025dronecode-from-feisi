@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="planner_rviz">
+    <include path="takeoff.xml"/>
+    <include path="land.xml" />
+    <include path="planner_node.xml"/>
+  <BehaviorTree ID="planner_rviz">
+    <Sequence _description="to avoid obstacle">
+
+      <Script code=" takeoff_goal:='0.0;0.0;1.0' "/>  <!--先飞机起飞 -->
+      <Script code=" is_rc:=0 "/>  <!--先飞机起飞 -->
+      <Script code=" P2_goal:='3.3;-1.8;0.5' "/>  <!--P2点位置 -->
+      <Script code=" P2_goal_ori:='0;0.0;0' "/>  
+      <SubTree ID="takeoff"
+                is_rc="{is_rc}"
+                goal="{takeoff_goal}"/>
+      <!-- 发送目标点进行轨迹规划 -->
+      <SubTree ID="planner" goal_position="{P2_goal}" goal_ori="{P2_goal_ori}"  goal_src="0" planner_ctrl_type ="1" />
+      <SubTree ID="land"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- 定义节点模型 -->
+  <TreeNodesModel>
+    <Action ID="PlanNodeRviz">
+        <input_port name="planner_ctrl_type" type="BT::AnyTypeAllowed">choose the control type,0:pose,1:volicty,2:accelerate</input_port>
+        <input_port name="enable_planner" type="BT::AnyTypeAllowed">open or close planner</input_port>
+    </Action>
+  </TreeNodesModel>
+</root>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="match_tree">
+  <include path="takeoff.xml"/>
+  <include path="land.xml" />
+
+  <BehaviorTree ID="full_fucntion">
+    <Sequence _description="contain all function">
+     <SetBlackboard name="hoverctl" value="false" output_key="stop  _hover" /> <!-- 先设置悬停 -->
+     <SetBlackboard name="end_hover" value="false" output_key="hover_is_end" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="detect_ctrl" value="false" output_key="stop_detect" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="just_test" value="10" output_key="test_port" /> <!-- 结束悬停节点参数 -->
+    <Script code=" takeoff_goal:='0.0;0.0;1.0' "/>  <!--先飞机起飞 -->
+    <Script code=" is_rc:=0 "/>  <!--先飞机起飞 -->
+
+      <!-- 控制飞机起飞-->
+      <SubTree ID="takeoff" is_rc="{is_rc}" goal="{takeoff_goal}"/>
+          <!-- 这里有两种方案 1: 使用路径规划直接给到目标，中途可以插入伺服控制； 2：使用控制插入定点飞行方法，伺服插入，不管那种方法都可以使用行为组合的方式完成 -->
+      <Fallback>
+          <!-- 如果 是第一种方案 生成一条从起飞后到打击目标前的完整的轨迹 -->
+        <Sequence>
+            <Condition ID="ChooseMethod" config_param="{method}" expected_value="1" />
+<!--                <SubTree ID="SubTreeA" />-->
+            <Parallel success_count = "2">
+      <!-- 视觉伺服控制穿框和估计规划同时使用 -->
+                <PlanNode />
+                <CrossFrame />
+                <Hit /> <!--如果飞行的过程中发现了气球是非攻击，待定，考虑比赛规则，需要等到小车越过第二个柱子后才能击穿气球 -->
+            </Parallel>
+
+        </Sequence>
+
+          <!-- 如果方案二， 先使用指点飞行，+ 视觉伺服控制穿框 + 轨迹规划走后半段-->
+        <Sequence>
+            <Condition ID="ChooseMethod" config_param="{method}" expected_value="2" />
+<!--            <SubTree ID="SubTreeB" />-->
+            <Action ID="ArriveGoal"/> <!-- 先制定飞到拐弯处-->
+            <CrossFrame /> <!-- 再开启视觉伺服穿框的过程 -->
+            <PlanNode /> <!-- 规划到P2点轨迹 -->
+        </Sequence>
+
+          <!-- 默认行为 -->
+        <SubTree ID="SubTreeC" />
+     </Fallback>
+
+     <Parallel>
+        <Hover  hover_is_end="false" stop_hover="false"/>  <!--悬停等待目标识别-->
+        <DetectObj class_name="balloon" stop_detect="false"/> <!-- 目标检测 -->
+        <Hit /> <!-- 等到飞机飞到P2点开启攻击气球的节点 -->
+     </Parallel>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+   <SubTree ID="takeoff" />
+   <SubTree ID="land" />
+   <Action ID="Hover">
+       <input_port name="stop_hover" type="bool"/>
+       <input_port name="hover_is_end" type="bool"/>
+   </Action>
+
+    <Action ID="DetectObj">
+        <input_port name="stop_detect" type="bool"/>
+        <output_port name="stop_hover" type="bool"/>
+        <input_port name="class_name" type="BT::AnyTypeAllowed">input class name</input_port>
+    </Action>
+    <Action ID="CrossFrame">
+        <input_port name="ctrl_speed" type="BT::AnyTypeAllowed">set corss frame speed</input_port>
+        <input_port name="ctrl_type" type="BT::AnyTypeAllowed">0: just use Visual servo; 1: use planner</input_port>
+    </Action>
+    <Action ID="PlanNode">
+        <input_port name="planner_ctrl_type" type="BT::AnyTypeAllowed">choose the control type,0:pose,1:volicty,2:accelerate</input_port>
+        <input_port name="enable_planner" type="BT::AnyTypeAllowed">open or close planner</input_port>
+        <input_port name="goal_ori" type="BT::AnyTypeAllowed">the goal orientation, [roll, pitch, yaw]</input_port>
+        <input_port name="goal_position" type="BT::AnyTypeAllowed">the goal position</input_port>
+    </Action>
+
+  </TreeNodesModel>
+
+</root>

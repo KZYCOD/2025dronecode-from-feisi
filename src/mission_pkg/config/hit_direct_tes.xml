@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="hit_direct">
+  <BehaviorTree ID="hit_direct">
+    <Sequence _description="make drone fly to special piont">
+        <Action ID="HitDirect" object_name="balloon" right_line="30" left_line="100" yaw_err="0.1" />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+        <Action ID="HitDirect">
+            <input_port name="left_line" type="BT::AnyTypeAllowed">no discript</input_port>
+            <input_port name="yaw_err" type="BT::AnyTypeAllowed">when the object's yaw subtract fcu's yaw lees than value ,considered equ</input_port>
+            <input_port name="right_line" type="BT::AnyTypeAllowed">no discript</input_port>
+            <input_port name="object_name" type="BT::AnyTypeAllowed">input hitted object</input_port>
+        </Action>
+  </TreeNodesModel>
+</root>

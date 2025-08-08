@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="hit_ball">
+  <include path="takeoff.xml"/>
+  <include path="hit.xml"/>
+  <include path="planner_node.xml"/>
+  <BehaviorTree ID="hit_ball">
+    <Sequence _description="make drone fly to special piont">
+      <Script code=" takeoff_goal:='0.0;0.0;1.0' "/> <!--首先起飞-->
+      <Script code=" is_rc:=0 "/> <!--是否使用遥控器控制飞机，切换模式和解锁-->
+
+      <SubTree ID="takeoff" is_rc="{is_rc}"  goal="{takeoff_goal}"/>
+      <Parallel success_count="6" failure_count="1"> 
+        <SetBlackboard name="method" value="1" output_key="method" />
+        <SetBlackboard name="goal_src" value="1" output_key="goal_src" /> <!--设置目标点的来源-->
+        <Hover  hover_is_end="false" stop_hover="false"/>  <!--飞机起飞后悬停，等待目标识别-->
+        <DetectObj class_name="balloon" stop_detect="false"/> <!-- 目标检测 -->
+        <SubTree ID="planner" goal_position="{goal}" goal_ori="{P2_goal_ori}" goal_src="{goal_src}" planner_ctrl_type ="1" />
+        <SubTree ID="hit" object_name="balloon" method="{method}" /> <!-- 1: direct,2:other 刺破球，是直接发现目标直接刺破，还是选择符合27届机器人大赛 -->
+      </Parallel>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <SubTree ID="takeoff" />
+    <SubTree ID="hit" />
+    <Action ID="Hover">
+        <input_port name="stop_hover" type="bool"/>
+        <input_port name="hover_is_end" type="bool"/>
+    </Action>
+
+    <Action ID="DetectObj">
+        <input_port name="stop_detect" type="bool"/>
+        <output_port name="stop_hover" type="bool"/>
+        <input_port name="class_name" type="BT::AnyTypeAllowed">input class name</input_port>
+    </Action>
+
+
+  </TreeNodesModel>
+</root>

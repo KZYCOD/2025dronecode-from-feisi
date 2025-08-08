@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+
+  <BehaviorTree ID="land">
+    <Sequence _description="make drone land">
+      <!-- 定义变量 -->
+<!--      <Script code=" use_speed:=0 " />
+      <Script code=" speed_z:=-0.4 " />-->
+      <SetBlackboard value="1" output_key="use_speed"/>
+      <SetBlackboard value="-0.4" output_key="speed_z"/>
+      <!-- 调用 Takeoff 节点 -->
+      <Land use_speed="{use_speed}" speed_z="{speed_z}"/>
+    </Sequence>
+
+  </BehaviorTree>
+
+  <!-- 定义节点模型 -->
+  <TreeNodesModel>
+    <Action ID="land"/>
+  </TreeNodesModel>
+</root>

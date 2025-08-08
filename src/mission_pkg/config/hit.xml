@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="hit">
+  <BehaviorTree ID="hit">
+    <Sequence _description="make drone fly to special piont">
+        <Action ID="Hit" object_name="{object_name}" method="{method}" hit_dist="{hit_dist}" goal_tolerance="{goal_tolerance}" needle_ang_adapt="{needle_ang_adapt}"  left_line="{left_line}" right_line="{right_line}" yaw_err="{yaw_err}" /> 
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Hit">
+            <input_port name="right_line" type="BT::AnyTypeAllowed">no discript</input_port>
+            <input_port name="left_line" type="BT::AnyTypeAllowed">no discript</input_port>
+            <input_port name="needle_ang_adapt" type="BT::AnyTypeAllowed">the value to adapt the needle fixed angle</input_port>
+            <input_port name="goal_tolerance" type="BT::AnyTypeAllowed">the value greate than obj_inflate ande less than his_dist</input_port>
+            <input_port name="yaw_err" type="BT::AnyTypeAllowed">when the object's yaw subtract fcu's yaw lees than value ,considered equ</input_port>
+            <input_port name="hit_dist" type="BT::AnyTypeAllowed">when the to object distane less the value</input_port>
+            <input_port name="method" type="BT::AnyTypeAllowed">hit object method,direct or other</input_port>
+            <input_port name="object_name" type="BT::AnyTypeAllowed">input hitted object</input_port>
+    </Action>
+  </TreeNodesModel>
+</root>

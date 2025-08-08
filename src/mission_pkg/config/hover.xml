@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="hover">
+  <BehaviorTree ID="hover">
+    <Sequence _description="make drone fly to special piont">
+        <Action ID="Hover" hover_is_end="{hover_is_end}" stop_hover="{stop_hover}" is_time_ctrl="{is_time_ctrl}"/> <!-- 进入穿框动作 -->
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Hover">
+            <input_port name="is_time_ctrl" type="double">keep hover time</input_port>
+            <input_port name="hover_is_end" type="bool">if exit current node,be set ture</input_port>
+            <input_port name="stop_hover" type="bool">emit hover event</input_port>
+        </Action>
+  </TreeNodesModel>
+</root>

@@ -1,0 +1,4 @@
+<launch>
+  <env name="LIBGL_ALWAYS_SOFTWARE" value="0" />  <!-- 仅在需要时启用 -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ego_planner)/launch/new.rviz" required="true" />
+</launch>

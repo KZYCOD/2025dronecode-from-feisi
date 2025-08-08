@@ -1,0 +1,100 @@
+<launch>
+  <!-- size of map, change the size inflate x, y, z according to your application -->
+  <arg name="map_size_x" value="20.0"/>
+  <arg name="map_size_y" value="20.0"/>
+  <arg name="map_size_z" value=" 3.0"/>
+ 
+
+  <node pkg="tf" type="static_transform_publisher" name="lidar_baselink" args="0 0 0 0 0 0  base_link lidar 1000" />
+  <node pkg="tf" type="static_transform_publisher" name="base_link2odom" args="0 0 0 0 0 0  odom base_link 1000" />
+  <node pkg="tf" type="static_transform_publisher" name="map_world" args="0 0 0 0 0 0  world map 1000" />
+  <node pkg="tf" type="static_transform_publisher" name="depth_base_link" args="0 0 0 0 0 0  base_link depth 1000" />
+
+  <!-- topic of your odometry such as VIO or LIO -->
+  <!-- <arg name="odom_topic" value="/mavros/odometry/out" /> -->
+  <arg name="odom_topic" value="/rflysim/uav1/local/odom" />
+  <!-- <arg name="odom_topic" value="/t265/odom/sample" /> -->
+  
+  <!-- main algorithm params -->
+  <include file="$(find ego_planner)/launch/RflySimParam_debug.xml">
+
+    <arg name="map_size_x_" value="$(arg map_size_x)"/>
+    <arg name="map_size_y_" value="$(arg map_size_y)"/>
+    <arg name="map_size_z_" value="$(arg map_size_z)"/>
+    <arg name="odometry_topic" value="$(arg odom_topic)"/>
+
+    <!-- camera pose: transform of camera frame in the world frame -->
+    <!-- depth topic: depth image, 640x480 by default -->
+    <!-- don't set cloud_topic if you already set these ones! -->
+    <arg name="camera_pose_topic" value="/vins_estimator/odometry_edit"/>
+    <!-- <arg name="depth_topic" value="/rflysim/sensor2/img_depth"/> -->
+    <arg name="depth_topic" value="/"/>
+
+    <!-- topic of point cloud measurement, such as from LIDAR  -->
+    <!-- don't set camera pose and depth, if you already set this one! -->
+    <!-- <arg name="cloud_topic" value="/cloud_registered_effect_world"/> -->
+    <arg name="cloud_topic" value="/rflysim/sensor0/mid360_lidar"/>
+    <arg name="cloud_coord" value="2"/> <!-- 1: local; 2: body; 3: map-->
+
+    <!-- intrinsic params of the depth camera -->
+    <arg name="cx" value="320"/>
+    <arg name="cy" value="240"/>
+    <arg name="fx" value="320"/>
+    <arg name="fy" value="320"/>
+
+    <!-- maximum velocity and acceleration the drone will reach -->
+    <arg name="max_vel" value="0.2" />
+    <arg name="max_acc" value="0.1" />
+
+    <!--always set to 1.5 times grater than sensing horizen-->
+    <arg name="planning_horizon" value="20" /> 
+
+    <!-- 1: use 2D Nav Goal to select goal  -->
+    <!-- 2: use global waypoints below  -->
+    <arg name="flight_type" value="1" />
+    
+    <!-- global waypoints -->
+    <!-- It generates a piecewise min-snap traj passing all waypoints -->
+    <arg name="point_num" value="5" />
+
+    <arg name="point0_x" value="-15.0" />
+    <arg name="point0_y" value="0.0" />
+    <arg name="point0_z" value="1.0" />
+
+    <arg name="point1_x" value="0.0" />
+    <arg name="point1_y" value="15.0" />
+    <arg name="point1_z" value="1.0" />
+
+    <arg name="point2_x" value="15.0" />
+    <arg name="point2_y" value="0.0" />
+    <arg name="point2_z" value="1.0" />
+
+    <arg name="point3_x" value="0.0" />
+    <arg name="point3_y" value="-15.0" />
+    <arg name="point3_z" value="1.0" />
+
+    <arg name="point4_x" value="-15.0" />
+    <arg name="point4_y" value="0.0" />
+    <arg name="point4_z" value="1.0" />
+    
+  </include>
+
+  <!-- trajectory server -->
+  <node pkg="ego_planner" name="traj_server" type="traj_server" output="screen">
+    <remap from="/position_cmd" to="planning/pos_cmd"/>
+
+    <remap from="/odom_world" to="$(arg odom_topic)"/>
+    <param name="traj_server/time_forward" value="1.0" type="double"/>
+  </node>
+
+  <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+    <remap from="~odom" to="$(arg odom_topic)"/>        
+    <remap from="~goal" to="/planner/goal"/>
+    <remap from="~traj_start_trigger" to="/traj_start_trigger" />
+    <param name="waypoint_type" value="manual-lonely-waypoint"/>    
+  </node>
+
+  <!-- open rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ego_planner)/launch/default.rviz" required="true" />
+
+</launch>

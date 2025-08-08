@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <root BTCPP_format="4" main_tree_to_execute="MainTree">
+    <include path="takeoff.xml"/>
+    <BehaviorTree ID="MainTree">
+    <Sequence>
+        <!-- <SetBlackboard name="goal" value="0.0;0.0;2.5" output_key="goal"/> -->
+        <!-- <SetBlackboard name="is_rc" value="0" output_key="is_rc"/> -->
+        <Script code=" takeoff_goal:='0.0;0.0;2.5' "/>
+        <Script code=" is_rc:=0 "/> 
+        <SubTree ID="takeoff" goal="{takeoff_goal}" is_rc="{is_rc}"/>
+    </Sequence>
+    </BehaviorTree>
+
+  <TreeNodesModel>
+
+    <SubTree ID="takeoff">
+            <input_port name="is_rc" type="int">is remote controller operator</input_port>
+            <input_port name="goal" type="BT::Position3D">Takeoff position ... </input_port>
+    </SubTree>
+
+
+  </TreeNodesModel>
+
+</root>

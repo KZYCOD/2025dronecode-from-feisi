@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="planner">
+    <include path="takeoff.xml"/>
+    <include path="land.xml" />
+    <include path="sign"
+  <BehaviorTree ID="planner">
+    <Sequence _description="to avoid obstacle">
+
+      <Script code=" takeoff_goal:='0.0;0.0;1.0' "/>  <!--先飞机起飞 -->
+      <Script code=" is_rc:=0 "/>  <!--先飞机起飞 -->
+        <SubTree ID="takeoff"
+                 is_rc="{is_rc}"
+                 goal="{takeoff_goal}"/>
+        <!-- 发送目标点进行轨迹规划 -->
+        <Action
+        <SubTree ID="land"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- 定义节点模型 -->
+  <TreeNodesModel>
+    <Action ID="PlanNode">
+        <input_port name="planner_ctrl_type" type="BT::AnyTypeAllowed">choose the control type,0:pose,1:volicty,2:accelerate</input_port>
+        <input_port name="enable_planner" type="BT::AnyTypeAllowed">open or close planner</input_port>
+    </Action>
+  </TreeNodesModel>
+</root>

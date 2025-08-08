@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="takeoff">
+    <Sequence _description="make drone takeoff">
+      <!-- 定义变量 -->
+      <!-- <Script code=" is_rc:=0 " />
+      <Script code=" goal:='0.0;0.0;1.0' " /> -->
+      <!-- 调用 Takeoff 节点 -->
+      <Action ID="Takeoff" is_rc="{is_rc}" goal="{goal}"/>
+    </Sequence>
+
+  </BehaviorTree>
+
+  <!-- 定义节点模型 -->
+  <TreeNodesModel>
+    <Action ID="Takeoff">
+    <input_port name="is_rc" type="int">is remote controller operator</input_port>
+    <input_port name="goal" type="BT::Position3D">Takeoff position ... </input_port>
+    </Action>
+  </TreeNodesModel>
+</root>

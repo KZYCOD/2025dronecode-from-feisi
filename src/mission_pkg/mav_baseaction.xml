@@ -1,0 +1,26 @@
+<root BTCPP_format="4" >
+	<BehaviorTree ID="MainTree">
+		<Sequence name="root">
+			<Script    code=" takeoff_targetGoal:='0;0;20' " />
+			<Takeoff   takeoff_target="{takeoff_targetGoal}" />
+			<Script    code=" MoveForward_distanceGoal:='20' " />
+			<MoveForward   MoveForward_distance="{MoveForward_distanceGoal}" />	
+			<Script    code=" MoveBack_distanceGoal:='20' " />
+			<MoveBack   MoveBack_distance="{MoveBack_distanceGoal}" />	
+			<Script    code=" MoveRight_distanceGoal:='20' " />
+			<MoveRight   MoveRight_distance="{MoveRight_distanceGoal}" />	
+			<Script    code=" MoveLeft_distanceGoal:='20' " />
+			<MoveLeft   MoveLeft_distance="{MoveLeft_distanceGoal}" />	
+			<Script    code=" MoveUp_distanceGoal:='10' " />
+			<MoveUp   MoveUp_distance="{MoveUp_distanceGoal}" />	
+			<Script    code=" MoveDown_distanceGoal:='10' " />
+			<MoveDown   MoveDown_distance="{MoveDown_distanceGoal}" />		
+			<Script    code=" SendPositionGoal:='10;10;10' " />
+			<SendPosition   SendPosition="{SendPositionGoal}" />		
+			<Script    code=" SendVelocityGoal:='5;0;0' " />
+			<SendVelocity   SendVelocity="{SendVelocityGoal}" />	
+			<Action ID="Land"/>			
+		</Sequence>
+	</BehaviorTree>
+</root>
+

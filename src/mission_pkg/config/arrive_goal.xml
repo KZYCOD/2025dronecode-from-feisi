@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="PointGoal">
+    <Sequence _description="make drone fly to special piont">
+      <Script code=" point_goal:='0.0;1.5;0.8' "/>
+      <Script code=" ctrltype:=0 " />
+      <Script code=" velocity:='0;0.2;0' " />
+      <Script code=" acc:='0;0;0' " />
+      <Action ID="ArriveGoal" tolerance_d="0.2"
+                  velocity="{velocity}"
+                  acc="{acc}"
+                  ctrl_type="{ctrltype}"
+                  goal="{point_goal}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+     <Action ID="ArriveGoal">
+      <input_port name="tolerance_d"
+                  type="double">less than the value,it arrvied</input_port>
+      <input_port name="velocity"
+                  type="BT::Position3D">This is expect speed</input_port>
+      <input_port name="acc"
+                  type="BT::Position3D">This is expect accelerate</input_port>
+      <input_port name="ctrl_type"
+                  type="int">0:PosCtrl,1:Velocity,2:Acc,3:Planner</input_port>
+      <input_port name="goal"
+                  type="BT::Position3D">drone fly to goal</input_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>

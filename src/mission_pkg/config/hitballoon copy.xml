@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root BTCPP_format="4" main_tree_to_execute="hit_balloon">
+  <BehaviorTree ID="hit_balloon">
+    <Sequence _description="make drone fly to special piont">
+      <Parallel success_count="3"> <!-- 下面的三个节点并行运行，悬停，目标检测，穿框，-->
+        <Hover  hover_is_end="false" stop_hover="false"/>  <!--飞机起飞后悬停，等待目标识别-->
+        <DetectObj class_name="balloon" stop_detect="false"/> <!-- 目标检测 -->
+        <Hit /> <!-- 进入穿框动作 -->
+      </Parallel>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Hit"/>
+    <Action ID="Hover">
+        <input_port name="stop_hover" type="bool"/>
+        <input_port name="hover_is_end" type="bool"/>
+    </Action>
+
+    <Action ID="DetectObj">
+        <input_port name="stop_detect" type="bool"/>
+        <output_port name="stop_hover" type="bool"/>
+        <input_port name="class_name" type="BT::AnyTypeAllowed">input class name</input_port>
+    </Action>
+
+
+  </TreeNodesModel>
+</root>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+    <include path="takeoff.xml"/>
+<!--    <include path="land.xml"/>-->
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+        <SetBlackboard value="0" output_key="is_rc"/>
+        <SetBlackboard value="0.0;0.0;20.0" output_key="goal"/>
+<!--        <SetBlackboard value="1" output_key="use_speed"/>
+        <SetBlackboard value="-0.4" output_key="speed_z"/>-->
+<!--        <Takeoff is_rc="{is_rc}" goal="{goal}"/>
+        <Land use_speed="{use_speed}" speed_z="{speed_z}"/>-->
+        <SubTree ID="takeoff" is_rc="{is_rc}" goal="{goal}"/>
+<!--        <SubTree ID="Land" use_speed="{use_speed}" speed_z="{speed_z}" />-->
+    </Sequence>
+  </BehaviorTree>
+
+  <TreeNodeModel>
+<!--    <Action ID="Takeoff" />
+    <Action ID="Land" />-->
+    <SubTree ID="takeoff"/>
+<!--    <SubTree ID="Land" />-->
+  </TreeNodeModel>
+
+</root>

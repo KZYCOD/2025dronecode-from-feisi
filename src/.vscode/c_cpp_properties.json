@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/zy/ws/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/zy/ws/src/behaviortree_cpp/include/**",
+        "/home/zy/ws/src/ego-planner/src/planner/bspline_opt/include/**",
+        "/home/zy/ws/src/ego-planner/src/planner/plan_manage/include/**",
+        "/home/zy/ws/src/faster-lio-main/faster-lio-main/include/**",
+        "/home/zy/ws/src/mission_pkg/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/mockamap/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/Utils/multi_map_server/include/**",
+        "/home/zy/ws/src/ego-planner/src/planner/path_searching/include/**",
+        "/home/zy/ws/src/ego-planner/src/planner/plan_env/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/Utils/pose_utils/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/Utils/quadrotor_msgs/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/so3_control/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/so3_quadrotor_simulator/include/**",
+        "/home/zy/ws/src/ego-planner/src/planner/traj_utils/include/**",
+        "/home/zy/ws/src/ego-planner/src/uav_simulator/Utils/uav_utils/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

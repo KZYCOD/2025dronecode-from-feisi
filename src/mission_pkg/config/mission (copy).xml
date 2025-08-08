@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <include path="/home/zy/ws/src/mission_pkg/config/takeoff.xml"/>
+  <include path="/home/zy/ws/src/mission_pkg/config/land.xml"/>
+
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+        <SetBlackboard value="0" output_key="is_rc"/>
+        <SetBlackboard value="'0.0;0.0;20.0'" output_key="goal"/>
+        <SetBlackboard value="0" output_key="use_speed"/>
+        <SetBlackboard value="speed_z" output_key="0.0"/>
+
+        <SubTree ID="Takeoff" is_rc="{is_rc}" goal="{goal}"/>
+        <SubTree ID="Land" use_speed="{use_speed}" speed_z="{speed_z}" />
+    </Sequence>
+  </BehaviorTree>
+
+
+</root>

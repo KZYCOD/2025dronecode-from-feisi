@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <root BTCPP_format="4" main_tree_to_execute="MainTree">
+    <include path="takeoff.xml"/>
+    <include path="planner_node.xml" />
+    <include path="arrive_goal.xml" />
+    <include path="land.xml" />
+    <include path="hover.xml" />
+    <include path="hit.xml" />
+    <BehaviorTree ID="MainTree">
+    <Sequence>
+        <!-- <SetBlackboard name="goal" value="0.0;0.0;2.5" output_key="goal"/> -->
+        <SetBlackboard name="is_rc" value="1" output_key="is_rc"/>
+        <Script code=" P1_goal:='0.0;1.8;0.8' "/>  <!--P1点位置 -->
+        <Script code=" P2_goal:='4.2;2.1;1.0' "/>  <!--P2点位置 -->
+        <Script code=" P3_goal:='8;0.3;1.0' "/>  <!--P2点位置 -->
+        <Script code=" P4_goal:='8;0.3;0.6' "/>  <!--P2点位置 -->
+        <Script code=" goal_ori:='0;0.0;0' "/>  <!--P2目标点，飞机朝向 -->
+        <SetBlackboard name="enabel_yaw" value="false" output_key="enabel_yaw" />
+        <SetBlackboard name="enabel_yawrate" value="false" output_key="enabel_yawrate" />
+        <SetBlackboard name="ctrl_type" value="0" output_key="ctrl_type" />
+        <SetBlackboard name="hover_is_end" value="false" output_key="hover_is_end" />
+        <SetBlackboard name="stop_hover" value="false" output_key="stop_hover" />
+        <SetBlackboard name="is_time_ctrl" value="3.0" output_key="is_time_ctrl" />
+        
+
+        <Script code=" takeoff_goal:='0.0;0.0;0.8' "/> 
+        <SubTree ID="takeoff" is_rc="{is_rc}" goal="{takeoff_goal}"/>
+        <SubTree ID="hover" hover_is_end="{hover_is_end}" stop_hover="{stop_hover}" is_time_ctrl="{is_time_ctrl}" /> 
+        <SubTree ID="planner" goal_position="{P1_goal}" goal_ori="{goal_ori}" enabel_yaw="{enabel_yaw}" enabel_yawrate="{enabel_yawrate}" goal_src="0" planner_ctrl_type ="0" />
+        <SubTree ID="planner" goal_position="{P2_goal}" goal_ori="{goal_ori}" enabel_yaw="{enabel_yaw}" enabel_yawrate="{enabel_yawrate}" goal_src="0" planner_ctrl_type ="0" />
+        <SubTree ID="planner" goal_position="{P3_goal}" goal_ori="{goal_ori}" enabel_yaw="{enabel_yaw}" enabel_yawrate="{enabel_yawrate}"  goal_src="0" planner_ctrl_type ="0" />
+        <!-- <SubTree ID="hover" hover_is_end="{hover_is_end}" stop_hover="{stop_hover}" is_time_ctrl="{is_time_ctrl}" />  -->
+        <!-- <SubTree ID="land" />       -->
+        <GoalYaw goal_yaw="180" is_set_point="true" point="{P4_goal}" yaw_rate="0.01"/>
+
+        <!-- hit balloon-->
+        <Parallel success_count="5" failure_count="1">
+        <SetBlackboard name="method" value="1" output_key="method" /> <!-- 1: direct; other:-->
+        <SetBlackboard name="goal_src" value="1" output_key="goal_src" />
+         <Hover  hover_is_end="false" stop_hover="false" is_time_ctrl="-1"/> 
+         <!-- <DetectObj class_name="balloon" stop_detect="false"/> -->
+         <SubTree ID="planner" goal_position="{P4_goal}" goal_ori="{goal_ori}" enabel_yaw="true" enabel_yawrate="{enabel_yawrate}" goal_src="{goal_src}" planner_ctrl_type ="0" />
+        <SubTree ID="hit" object_name="balloon" method="{method}" hit_dist="0.6" goal_tolerance="0.5" needle_ang_adapt="0.15" right_line="213" left_line="427"  yaw_err="0.2"/>
+      </Parallel>
+
+    </Sequence>
+    </BehaviorTree>
+
+  <TreeNodesModel>
+    <SubTree ID="takeoff">
+      <input_port name="is_rc" type="int">is remote controller operator</input_port>
+      <input_port name="goal" type="BT::Position3D">Takeoff position ... </input_port>
+    </SubTree>
+    <SubTree ID="planner" />
+    <SubTree ID="PointGoal"/>
+    <SubTree ID="land"/>
+    <Action ID="GoalYaw">
+      <input_port name="yaw_rate" type="BT::AnyTypeAllowed">use we want yaw_rate</input_port>
+      <input_port name="is_set_point" type="BT::AnyTypeAllowed">if we want set point</input_port>
+      <input_port name="point" type="BT::AnyTypeAllowed">set we need point,but the is_set_point is true</input_port>
+      <input_port name="goal_yaw" type="BT::AnyTypeAllowed">we need to control the fcu yaw</input_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>

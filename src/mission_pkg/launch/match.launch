@@ -1,0 +1,29 @@
+<launch>
+    <param name="kx" value="0.005" type="double"/>
+    <param name="ky" value="0.005" type="double"/>
+    <param name="kz" value="0.005" type="double"/>
+    <param name="v_max" value="0.4" type="double"/>
+    <param name="img_w" value="640" type="int"/>
+    <param name="img_h" value="480" type="int"/>
+    <param name="fx" value="320" type="double"/>
+    <param name="fy" value="320" type="double"/>
+    <param name="rgb_ppy" value="240" type="int"/>
+    <param name="rgb_ppx" value="320" type="int"/>
+    <param name="rgb_fov_h" value="42.0" type="double"/>
+    <param name="rgb_fov_v" value="42.0" type="double"/>
+    <param name="min_score" value="0.7" type="double"/>
+    <param name="planner_cmd_topic" value="/planning/pos_cmd" type="str"/>
+
+    <!-- 以下带port的参数名是给BT节点用的 -->
+    <param name="stop_hover_port" value="false" type="bool"/>
+    <param name="stop_detect_port" value="false" type="bool"/>
+    <param name="hover_is_end_port" value="false" type="bool"/>
+
+    <rosparam param="cam2body_R">[0,0,1,-1,0,0,0,-1,0]</rosparam>
+    <rosparam param="cam2body_T">[0.2,0,0]</rosparam>
+
+    <!-- 起飞后发一个目标点给飞控 -->
+    <node pkg="mission_pkg" type="bt_ros" name="match" output="screen">
+      <param name="config_path" value="$(find mission_pkg)/config/match.xml" type="str"/>
+    </node>
+</launch>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="cross_frame">
+  
+  <BehaviorTree ID="cross_frame">
+    <Sequence _description="control drone cross frame">
+     <SetBlackboard name="hoverctl" value="false" output_key="stop_hover" /> <!-- 先设置悬停 -->
+     <SetBlackboard name="end_hover" value="false" output_key="hover_is_end" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="detect_ctrl" value="false" output_key="stop_detect" /> <!-- 结束悬停节点参数 -->
+       <Parallel success_count="3"> <!-- 下面的三个节点并行运行，悬停，目标检测，穿框，-->
+            <Hover  hover_is_end="{hover_is_end}" stop_hover="{stop_hover}"/>  <!--飞机起飞后悬停，等待目标识别-->
+            <DetectObj class_name="frame" stop_detect="{stop_detect}"/> <!-- 目标检测 -->
+            <CrossFrame ctrl_type="0" object_name="frame"/> <!-- 进入穿框动作 -->
+       </Parallel>
+<!--       <SubTree ID="land" />-->
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+   <Action ID="Hover">
+       <input_port name="stop_hover" type="bool"/>
+       <input_port name="hover_is_end" type="bool"/>
+   </Action>
+
+    <Action ID="DetectObj">
+        <input_port name="stop_detect" type="bool"/>
+        <output_port name="stop_hover" type="bool"/>
+        <input_port name="class_name" type="BT::AnyTypeAllowed">input class name</input_port>
+    </Action>
+    <Action ID="CrossFrame">
+        <input_port name="ctrl_speed" type="BT::AnyTypeAllowed">set corss frame speed</input_port>
+        <input_port name="ctrl_type" type="BT::AnyTypeAllowed">0: just use Visual servo; 1: use planner</input_port>
+        <input_port name="object_name" type="BT::AnyTypeAllowed">we need cross frame name</input_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>

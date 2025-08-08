@@ -1,0 +1,6 @@
+<launch>
+    <!-- 起飞后发一个目标点给飞控 -->
+    <node pkg="mission_pkg" type="bt_ros" name="fly2point" output="screen">
+      <param name="config_path" value="$(find mission_pkg)/config/point_goal.xml" type="str"/>
+    </node>
+</launch>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="MatchTree">
+  <include path="takeoff.xml"/>
+  <include path="planner_node.xml" />
+  <include path="cross_frame.xml" />
+  <include path="hit.xml" />
+  <!-- <include path="hover.xml" /> -->
+  <include path="arrive_goal.xml" />
+
+  <BehaviorTree ID="MatchTree">
+    <Sequence _description="contain all function">
+     <SetBlackboard name="stop_hover" value="false" output_key="stop_hover" /> <!-- 先设置悬停 -->
+     <SetBlackboard name="hover_is_end" value="false" output_key="hover_is_end" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="detect_ctrl" value="false" output_key="stop_detect" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="just_test" value="10" output_key="test_port" /> <!-- 结束悬停节点参数 -->
+     <SetBlackboard name="method" value="2" output_key="method" /> <!-- 结束悬停节点参数 --> <!--直接使用定点飞行+视觉伺服控制-->
+    <Script code=" takeoff_goal:='0.0;0.0;1.0' "/>  <!--先飞机起飞 -->
+    <Script code=" P1_goal:='0.0;0.0;1.0' "/>  <!--P1点位置 -->
+    <Script code=" P2_goal:='7.3;0.0;0.5' "/>  <!--P2点位置 -->
+    <Script code=" P2_goal_ori:='0;0.0;0' "/>  <!--P2目标点，飞机朝向 -->
+    <Script code=" is_rc:=0 "/>  <!--先飞机起飞 -->
+    <SetBlackboard name="point_goal" value="0.0;1.5;1" output_key="point_goal" />
+    <SetBlackboard name="ctrl_type" value="1" output_key="ctrl_type" />
+    <SetBlackboard name="velocity" value="0;0.3;0" output_key="velocity" />
+      <!-- 控制飞机起飞-->
+      <SubTree ID="takeoff" is_rc="{is_rc}" goal="{takeoff_goal}"/>
+          <!-- 这里有两种方案 1: 使用路径规划直接给到目标，中途可以插入伺服控制； 2：使用控制插入定点飞行方法，伺服插入，不管那种方法都可以使用行为组合的方式完成 -->
+      <Fallback>
+          <!-- 如果 是第一种方案 生成一条从起飞后到打击目标前的完整的轨迹 -->
+        <Sequence>
+            <Condition ID="MatchCtrlChoose" config_param="{method}" expected_value="1" />
+            <Parallel success_count = "2">
+                <!-- 视觉伺服控制穿框和轨迹规划同时使用 -->
+                <!-- <PlanNode goal_position="{P2_goal}" goal_ori="{P2_goal_ori}" enable_planner="true" planner_ctrl_type="1"/> -->
+                <SubTree ID="planner" goal_position="{P2_goal}" goal_ori="{P2_goal_ori}" planner_ctrl_type ="1" />
+                <SubTree ID="cross_frame" />
+                <!-- <SubTree ID="hitballoon" object_name="balloon"/>如果飞行的过程中发现了气球是否攻击，待定，考虑比赛规则，需要等到小车越过第二个柱子后才能击穿气球 -->
+            </Parallel>
+
+        </Sequence>
+
+          <!-- 如果方案二， 先使用指点飞行，+ 视觉伺服控制穿框 + 轨迹规划走后半段-->
+        <Sequence>
+            <Condition ID="MatchCtrlChoose" config_param="{method}" expected_value="2" />
+            <!-- <Action ID="ArriveGoal" goal="0;1.9;1"/> 先制定飞到拐弯处 -->
+            <!-- <SetBlackboard name="goal_xml" value="0" /> -->
+            <SubTree ID="PointGoal" goal="{point_goal}" ctrl_type="{ctrl_type}" velocity="{velocity}"/>
+            <SubTree ID="cross_frame" /> <!--开启视觉伺服穿框的过程-->
+            <!-- 这个时候等待需要等待轨迹规划后才能飞行，因此这里应该保持悬停-->
+            <!-- <SubTree ID="planner" goal_position="{InsertP}" goal_ori="{P2_goal_ori}" planner_ctrl_type ="0" /> -->
+            
+            <Parallel success_count = "2" failure_count="1"> <!-- 悬停节点和路径规划节点，同时进行-->
+              <!-- 路径规划需要时间，在规划出轨迹前，飞机悬停等待-->
+            <Hover hover_is_end="{hover_is_end}" stop_hover="{stop_hover}"/> 
+            <SubTree ID="planner" goal_position="{P2_goal}" goal_ori="{P2_goal_ori}"  goal_src="0" planner_ctrl_type ="1" />
+            </Parallel>
+            
+            <!-- 经过上面的操作后，飞机没有需要掉头转向-->
+            <GoalYaw goal_yaw="180" />
+        </Sequence>
+      </Fallback>
+
+      <Parallel success_count="6" failure_count="1">
+        <SetBlackboard name="method" value="1" output_key="method" />
+        <SetBlackboard name="goal_src" value="1" output_key="goal_src" />
+         <Hover  hover_is_end="false" stop_hover="false"/> 
+         <DetectObj class_name="balloon" stop_detect="false"/>
+         <SubTree ID="planner" goal_position="{goal}" goal_ori="{P2_goal_ori}" goal_src="{goal_src}" planner_ctrl_type ="1" />
+        <SubTree ID="hit" object_name="balloon" method="{method}" />
+      </Parallel>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+
+   <SubTree ID="takeoff" />
+   <SubTree ID="PointGoal" />
+   <SubTree ID="cross_frame" />
+   <SubTree ID="hit" />
+   <SubTree ID="planner" />
+   <SubTree ID="land" />
+    <Condition ID="MatchCtrlChoose">
+      <input_port name="expected_value" type="int"/>
+      <input_port name="config_param" type="int"/>
+    </Condition>
+   <Action ID="Hover">
+      <input_port name="stop_hover" type="bool"/>
+      <input_port name="hover_is_end" type="bool"/>
+    </Action>
+    <Action ID="DetectObj">
+        <input_port name="stop_detect" type="bool"/>
+        <output_port name="stop_hover" type="bool"/>
+        <input_port name="class_name" type="BT::AnyTypeAllowed">input class name</input_port>
+    </Action>
+    <Action ID="GoalYaw">
+        <input_port name="goal_yaw" type="BT::AnyTypeAllowed">we need to control the fcu yaw</input_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>
