@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!-- Real-world detection launch file for d435i camera -->
+    <arg name="camera_topic" default="/camera/color/image_raw"/>
+    <arg name="is_simulation" default="false"/>
+    <arg name="red_threshold" default="120"/>
+    
+    <node pkg="object_det" name="det_node" type="det.py" output="screen">
+        <param name="is_simulation" value="$(arg is_simulation)"/>
+        <param name="camera_topic" value="$(arg camera_topic)"/>
+        <param name="red_threshold" value="$(arg red_threshold)"/>
+        <remap from="objects" to="/objects"/>
+    </node>
+</launch>

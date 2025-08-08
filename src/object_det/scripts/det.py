@@ -24,7 +24,8 @@ class_name =["frame","balloon"]
 # -----------------------------参数--------------------------------
 # yolo模型路径
 Model_path = script_dir + '/Model/frame_balloon.pt'
-red_channel_th = 60 #红色通道的阈值
+red_channel_th = 60 #红色通道的阈值 (仿真环境默认值)
+red_channel_th_real = 120 #红色通道的阈值 (真实环境d435i相机)
 
 # ----------------------------------------------------------------
 
@@ -43,6 +44,14 @@ class Depth_Estimate:
         self.task = None
         self.is_sim = sim
         self.sensor_id = 0
+        
+        # 根据环境选择合适的红色阈值
+        if self.is_sim:
+            self.red_threshold = red_channel_th  # 仿真环境阈值
+            rospy.loginfo("Detection initialized for SIMULATION environment (threshold=%d)", self.red_threshold)
+        else:
+            self.red_threshold = red_channel_th_real  # 真实环境d435i相机阈值
+            rospy.loginfo("Detection initialized for REAL WORLD d435i camera (threshold=%d)", self.red_threshold)
         
 
         self.color_lock = threading.Lock()
@@ -64,12 +73,22 @@ class Depth_Estimate:
         red_channel = roi[:,:,2]
         red_mask = red_channel > threshold
         red_pixel_coords = np.column_stack(np.where(red_mask))
+        
+        # Log detection statistics for debugging
+        total_pixels = roi.shape[0] * roi.shape[1]
+        red_pixels_count = len(red_pixel_coords)
+        red_percentage = (red_pixels_count / total_pixels) * 100 if total_pixels > 0 else 0
+        
+        rospy.logdebug("ROI red pixel detection - threshold: %d, red pixels: %d/%d (%.1f%%)", 
+                      threshold, red_pixels_count, total_pixels, red_percentage)
+        
         # 计算红色像素的中心位置（相对于ROI）
         if len(red_pixel_coords) > 0:
             center_roi = np.mean(red_pixel_coords, axis=0).astype(int)
             # 将中心位置转换为原始图像坐标系
             center_original = (center_roi[1] + left[0], center_roi[0] + left[1])
-            # print(f"红色像素的中心位置（原始图像坐标系）: {center_original}")
+            rospy.logdebug("Red pixel center found at: %s (%.1f%% coverage)", center_original, red_percentage)
+            
             red_pixels_visualization = np.zeros_like(roi)
             red_pixels_visualization[red_mask] = [0, 0, 255]  # 将红色像素点标记为红色
 
@@ -83,7 +102,8 @@ class Depth_Estimate:
             #cv2.waitKey(1)
             
         else:
-            print("没有找到红色像素")
+            rospy.logwarn("No red pixels found above threshold %d in ROI (size: %dx%d)", 
+                         threshold, roi.shape[1], roi.shape[0])
             center_original = None
         if center_original is not None:
             cv2.circle(img, center_original, 5, (0, 255, 0), -1)  # 在中心位置画一个绿色圆点   
@@ -127,13 +147,24 @@ class Depth_Estimate:
                 obj.right_bottom_x = xy[2]
                 obj.right_bottom_y = xy[3]
                 if(obj.class_name == "balloon"): #对于气球我们需要提取红色像素点
-                    cnt =  self.roi_track(img_yolo,xy[0:2],xy[2:4],60) 
+                    cnt = self.roi_track(img_yolo,xy[0:2],xy[2:4],self.red_threshold) 
+                    
+                    # 如果使用默认阈值失败，在真实环境下尝试更低的阈值
+                    if(cnt == None and not self.is_sim):
+                        rospy.logwarn("Failed to detect red pixels with threshold %d, trying lower threshold", self.red_threshold)
+                        fallback_threshold = max(40, self.red_threshold - 30)  # 尝试更低的阈值，但不低于40
+                        cnt = self.roi_track(img_yolo,xy[0:2],xy[2:4], fallback_threshold)
+                        
+                        if cnt is not None:
+                            rospy.loginfo("Red pixels detected with fallback threshold %d", fallback_threshold)
+                    
                     if(cnt == None):
-                        print("当前逻辑出错")
+                        rospy.logwarn("Failed to detect red pixels in balloon region with any threshold")
                         return
                     else:
                         obj.center_x = cnt[0]
                         obj.center_y = cnt[1]
+                        rospy.logdebug("Balloon center detected at (%d, %d)", obj.center_x, obj.center_y)
                 else:
                     obj.center_x = int((xy[0] + xy[2])/2)
                     obj.center_y = int((xy[1] + xy[3])/2)
@@ -157,9 +188,23 @@ class Depth_Estimate:
 
 if __name__ == "__main__":
     rospy.init_node('det_node')
-    topic1 = "/camera/color/image_raw" #前视相机的图像
-    is_sim = True #仿真与真机的颜色通道值不同
-    img_proc = Depth_Estimate(img1_topic = topic1,sim = is_sim)
+    
+    # 可配置参数：设置为真实环境或仿真环境
+    is_sim = rospy.get_param('~is_simulation', True)  # 默认为仿真环境
+    topic1 = rospy.get_param('~camera_topic', "/camera/color/image_raw")  # 可配置的相机话题
+    
+    # 支持通过参数自定义红色检测阈值
+    custom_red_threshold = rospy.get_param('~red_threshold', -1)
+    if custom_red_threshold > 0:
+        if is_sim:
+            red_channel_th = custom_red_threshold
+        else:
+            red_channel_th_real = custom_red_threshold
+        rospy.loginfo("Using custom red threshold: %d", custom_red_threshold)
+    
+    rospy.loginfo("Starting detection node with is_simulation=%s, camera_topic=%s", is_sim, topic1)
+    
+    img_proc = Depth_Estimate(img1_topic = topic1, sim = is_sim)
     while not rospy.is_shutdown():
         img_proc.run()
         if cv2.waitKey(10) == ord('q'):
