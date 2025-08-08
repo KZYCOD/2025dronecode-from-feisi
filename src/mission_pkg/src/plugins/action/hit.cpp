@@ -215,33 +215,25 @@ NodeStatus Hit::onRunning()
   
   if(!ret && !is_vis_servo_end)
   {//如果没有获取到目标位置,也不是在刺破的末端
-    ROS_WARN("In Hit Node, not get object goal");
-    // bool plan_flag = false;
-    // nh->getParam("is_pause_planner",plan_flag);
-    // if(!plan_flag)
-    // {
-    //   nh->setParam("is_pause_planner", true);  //暂停planner node 去控制
-    //   return NodeStatus::RUNNING;  //当次不控制
-    // }
-    // else
-    // {
-    //   ROS_WARN("puase planner node");
-    // }
+    ROS_WARN("In Hit Node, not get object goal - isDetect: %s, depth_buffer size: %lu, obj center: (%d,%d)", 
+             isDetect ? "true" : "false", depth_buffer_.size(), obj.center_x, obj.center_y);
     return NodeStatus::RUNNING;
   }
   ROS_INFO("Get object coord: (%f,%f,%f)",goal.pose.position.x,goal.pose.position.y,goal.pose.position.z);
   if((!isDetect  || ros::Time::now() - last_obj_time > ros::Duration(2)) && !is_vis_servo_end)
   { //如果一段时间没有检测到目标
+      double time_since_last_obj = (ros::Time::now() - last_obj_time).toSec();
       if(ros::Time::now() - last_obj_time > ros::Duration(2))
       {//较长时间没有检测到目标，清空队列
-        ROS_WARN("haven't recv object ,last_obj_time: %d.%09d",last_obj_time.sec,last_obj_time.nsec);
+        ROS_WARN("haven't recv object for %.1f seconds, last_obj_time: %d.%09d", 
+                 time_since_last_obj, last_obj_time.sec, last_obj_time.nsec);
         std::deque<geometry_msgs::PoseStamped>().swap(obj_tra);
         std::queue<common_msgs::Obj>().swap(objs_queue);
         isDetect = false;
       }
       bool stop_hover;
       nh->getParam("stop_hover_port", stop_hover);;
-      ROS_WARN("lost object ,keep hover [in hit.cpp at Running]");
+      ROS_WARN("lost object for %.1f seconds, keep hover [in hit.cpp at Running]", time_since_last_obj);
       nh->setParam("is_pause_planner", true); //暂停规划器节点
       nh->setParam("stop_hover_port", false);
       // isHit_enable = false;
@@ -824,11 +816,14 @@ void Hit::DepthCallback(const sensor_msgs::Image::ConstPtr &msg)
 void Hit::RecvObj(const common_msgs::Objects::ConstPtr &msg)
   { // 这里需要的目标是目标分割后的中心位置，而非检测框的中心位置；
 
-    // ROS_INFO("recv objsize in hit: %d", msg->objects.size());
+    ROS_DEBUG("recv objsize in hit: %d", msg->objects.size());
     obj_name = "balloon";
 
     if (msg->objects.empty() || obj_name.empty())
+    {
+      ROS_DEBUG("No objects received or obj_name empty");
       return;
+    }
     
     static int idx = -1;
     static double score = -1.0;
@@ -837,15 +832,19 @@ void Hit::RecvObj(const common_msgs::Objects::ConstPtr &msg)
     {
       if (msg->objects[i].class_name != obj_name)
         continue;
-      // ROS_INFO("Recv ball object");
+      ROS_DEBUG("Found balloon object with score: %f, center: (%d,%d)", 
+                msg->objects[i].score, msg->objects[i].center_x, msg->objects[i].center_y);
       if (msg->objects[i].score > score)
       {
         idx = i;
         score = msg->objects[i].score;
       }
     };
-    if (msg->objects[idx].score < 0.5 || msg->objects[idx].class_name != obj_name)
+    
+    if (idx < 0 || msg->objects[idx].score < 0.5 || msg->objects[idx].class_name != obj_name)
     { // 置信度太低了，
+      ROS_WARN("Object score too low (%f) or no valid balloon detected", 
+               idx >= 0 ? msg->objects[idx].score : -1.0);
       idx = -1;
       score = -1;
       // std::unique_lock<std::mutex> lock(mtx, std::try_to_lock);
@@ -863,11 +862,13 @@ void Hit::RecvObj(const common_msgs::Objects::ConstPtr &msg)
     {
       obj = msg->objects[idx];
       last_obj_time = ros::Time::now();
-      // ROS_INFO("recv obj time: %d.%09d", obj.header.stamp.sec, obj.header.stamp.nsec);
+      ROS_INFO("Successfully received balloon object: score=%.2f, center=(%d,%d), time=%d.%09d", 
+               obj.score, obj.center_x, obj.center_y, obj.header.stamp.sec, obj.header.stamp.nsec);
       // objs_queue.push(obj);
       if(is_innode && !isDetect)
       {
         isDetect = true;
+        ROS_INFO("First balloon detection in Hit node");
       }
       // if(objs_queue.size() > objs_len)
       // {
