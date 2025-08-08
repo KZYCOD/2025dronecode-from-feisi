@@ -96,7 +96,12 @@ class Depth_Estimate:
         self.color_lock.acquire()
 
         self.color_img = self.img_bridge.imgmsg_to_cv2(self.img_msg, self.img_msg.encoding)
-        img = cv2.cvtColor(self.color_img, cv2.COLOR_BGR2RGB)
+        if self.is_sim:
+            # For simulation, use BGR to RGB conversion
+            img = cv2.cvtColor(self.color_img, cv2.COLOR_BGR2RGB)
+        else:
+            # For real world camera, use image directly without color conversion
+            img = self.color_img.copy()
 #        cv2.imshow("img",img);
 #        cv2.waitKey(1);
         #保证不用的数据不占用资源
@@ -127,7 +132,9 @@ class Depth_Estimate:
                 obj.right_bottom_x = xy[2]
                 obj.right_bottom_y = xy[3]
                 if(obj.class_name == "balloon"): #对于气球我们需要提取红色像素点
-                    cnt =  self.roi_track(img_yolo,xy[0:2],xy[2:4],60) 
+                    # Use different thresholds for simulation vs real world
+                    threshold = 60 if self.is_sim else 100  # Higher threshold for real world
+                    cnt =  self.roi_track(img_yolo,xy[0:2],xy[2:4],threshold) 
                     if(cnt == None):
                         print("当前逻辑出错")
                         return
@@ -158,7 +165,7 @@ class Depth_Estimate:
 if __name__ == "__main__":
     rospy.init_node('det_node')
     topic1 = "/camera/color/image_raw" #前视相机的图像
-    is_sim = True #仿真与真机的颜色通道值不同
+    is_sim = False #仿真与真机的颜色通道值不同 - Set to False for real world operation
     img_proc = Depth_Estimate(img1_topic = topic1,sim = is_sim)
     while not rospy.is_shutdown():
         img_proc.run()
