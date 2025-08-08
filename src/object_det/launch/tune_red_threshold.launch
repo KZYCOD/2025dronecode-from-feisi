@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!-- Red threshold tuning tool for d435i camera -->
+    <arg name="camera_topic" default="/camera/color/image_raw"/>
+    
+    <node pkg="object_det" name="red_threshold_tuner" type="tune_red_threshold.py" output="screen">
+        <param name="camera_topic" value="$(arg camera_topic)"/>
+    </node>
+</launch>
