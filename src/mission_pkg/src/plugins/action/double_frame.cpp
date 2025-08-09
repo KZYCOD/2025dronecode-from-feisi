@@ -9,7 +9,7 @@ DoubleFrame::DoubleFrame(const std::string &name, const NodeConfig &config)
   mct = MavRosConnect::getInstance();
   fcu_pose_ptr = mct->getFcuPose();
   fcu_state_ptr = mct->getFcuState();
-  tgt_pose_pub_ptr = mct->getPosTgtPublier();
+  tgt_pose_pub_ptr = std::make_shared<ros::Publisher>(*mct->getPosTgtPublier());
 
   // 初始化控制命令
   cmd.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
