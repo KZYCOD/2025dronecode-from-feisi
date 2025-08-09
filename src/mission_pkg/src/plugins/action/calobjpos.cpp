@@ -1,4 +1,4 @@
-﻿#include "plugins/action/calobjpos.h"
+#include "plugins/action/calobjpos.h"
 
 CalObjPos::CalObjPos(const std::string name, const NodeConfig &config)
   : StatefulActionNode(name, config)
