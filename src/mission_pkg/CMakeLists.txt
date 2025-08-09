@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.0.2)
 project(mission_pkg)
 
 add_compile_options(-std=c++17 -g -rdynamic)
@@ -19,7 +19,7 @@ find_package(catkin REQUIRED
     visualization_msgs
     )
 #find_package(livox_ros_driver2 REQUIRED)
-#find_package(behaviortree_cpp REQUIRED)
+find_package(behaviortree_cpp REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros1_node
@@ -47,7 +47,7 @@ foreach(SOURCE_FILE ${SOURCE_FILES})
     add_library(${NODE_LIBS} SHARED ${SOURCE_FILE})
     target_compile_definitions( ${NODE_LIBS} PRIVATE  BT_PLUGIN_EXPORT )
     set_target_properties(${NODE_LIBS}  PROPERTIES PREFIX "")
-    target_link_libraries(${NODE_LIBS}  PRIVATE ${BTCPP_LIBRARY} mavros_cnt ${catkin_LIBRARIES})
+    target_link_libraries(${NODE_LIBS}  PRIVATE ${BT_LIBRARIES} mavros_cnt ${catkin_LIBRARIES})
 endforeach()
 
 add_executable(bt_ros src/bt_ros.cpp)

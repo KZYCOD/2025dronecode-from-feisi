@@ -2,7 +2,7 @@
 <root BTCPP_format="4" main_tree_to_execute="planner">
     <include path="takeoff.xml"/>
     <include path="land.xml" />
-    <include path="sign"
+    <include path="sign.xml" />
   <BehaviorTree ID="planner">
     <Sequence _description="to avoid obstacle">
 
@@ -12,7 +12,7 @@
                  is_rc="{is_rc}"
                  goal="{takeoff_goal}"/>
         <!-- 发送目标点进行轨迹规划 -->
-        <Action
+        <PlanNode planner_ctrl_type="0" enable_planner="true"/>
         <SubTree ID="land"/>
     </Sequence>
   </BehaviorTree>

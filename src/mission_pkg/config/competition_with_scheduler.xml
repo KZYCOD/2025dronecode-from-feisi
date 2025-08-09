@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="CompetitionWithScheduler">
+  <include path="takeoff.xml"/>
+  <include path="land.xml"/>
+  <include path="planner_node.xml" />
+  <include path="cross_frame.xml" />
+
+  <BehaviorTree ID="CompetitionWithScheduler">
+    <Parallel success_count="1" failure_count="1">
+      
+      <!-- 高级任务调度器 -->
+      <CompetitionScheduler enable_emergency_stop="false" 
+                           current_mission_state="{mission_state}" 
+                           current_obstacle_id="{obstacle_id}"
+                           mission_complete="{mission_done}" />
+      
+      <!-- 主要任务执行序列 -->
+      <Sequence name="MainExecution" _description="Execute obstacles based on scheduler state">
+        
+        <!-- 初始化和起飞 -->
+        <Sequence name="Initialization">
+          <SetBlackboard value="false" output_key="mission_complete" />
+          <SetBlackboard value="0.0;0.0;2.0" output_key="takeoff_goal" />
+          <SetBlackboard value="0" output_key="is_rc" />
+          <SubTree ID="takeoff" is_rc="{is_rc}" goal="{takeoff_goal}"/>
+        </Sequence>
+        
+        <!-- 障碍序列 -->
+        <Sequence name="ObstacleCourse">
+          
+          <!-- 障碍1: 方框直穿 -->
+          <Sequence name="Obstacle1">
+            <SetBlackboard value="2.0;0.0;2.0" output_key="obs1_target" />
+            <SubTree ID="cross_frame" target_pos="{obs1_target}" frame_type="square" />
+            <PublishObstacleComplete obstacle_id="0" />
+          </Sequence>
+          
+          <!-- 障碍2: 圆框直穿 -->  
+          <Sequence name="Obstacle2">
+            <SetBlackboard value="4.0;0.0;2.0" output_key="obs2_target" />
+            <SubTree ID="cross_frame" target_pos="{obs2_target}" frame_type="circle" />
+            <PublishObstacleComplete obstacle_id="1" />
+          </Sequence>
+          
+          <!-- 障碍3: 双框穿越 -->
+          <Sequence name="Obstacle3">
+            <SetBlackboard value="6.0;-1.0;2.0" output_key="obs3_frame1" />
+            <SetBlackboard value="6.0;1.0;2.0" output_key="obs3_frame2" />
+            <DoubleFrame first_frame="{obs3_frame1}" second_frame="{obs3_frame2}" 
+                        direction="left_right" approach_speed="1.0" />
+            <PublishObstacleComplete obstacle_id="2" />
+          </Sequence>
+          
+          <!-- 障碍4: 翻跟斗 -->
+          <Sequence name="Obstacle4">
+            <SetBlackboard value="8.0;0.0;1.5" output_key="obs4_entry" />
+            <SetBlackboard value="8.0;0.0;2.5" output_key="obs4_exit" />
+            <Somersault entry_pos="{obs4_entry}" exit_pos="{obs4_exit}" 
+                       loop_radius="1.0" loop_speed="2.0" />
+            <PublishObstacleComplete obstacle_id="3" />
+          </Sequence>
+          
+          <!-- 障碍5: 环绕刀旗 -->
+          <Sequence name="Obstacle5">
+            <SetBlackboard value="red" output_key="flag_color" />
+            <SetBlackboard value="9.0;0.0;2.0" output_key="flag_area" />
+            <CircleFlag flag_color="{flag_color}" search_area="{flag_area}" 
+                       circle_radius="2.0" circle_speed="1.5" circle_height="2.0" />
+            <PublishObstacleComplete obstacle_id="4" />
+          </Sequence>
+          
+        </Sequence>
+        
+        <!-- 降落 -->
+        <Sequence name="FinalLanding">
+          <SetBlackboard value="true" output_key="use_speed" />
+          <SetBlackboard value="-0.4" output_key="speed_z" />
+          <SubTree ID="Land" use_speed="{use_speed}" speed_z="{speed_z}" />
+          <SetBlackboard value="true" output_key="mission_complete" />
+        </Sequence>
+        
+      </Sequence>
+      
+    </Parallel>
+  </BehaviorTree>
+
+  <!-- 树节点模型定义 -->
+  <TreeNodesModel>
+    <SubTree ID="takeoff" />
+    <SubTree ID="cross_frame" />
+    <SubTree ID="Land" />
+    <SubTree ID="planner" />
+    
+    <Action ID="CompetitionScheduler">
+      <input_port name="enable_emergency_stop" type="bool">启用紧急停止</input_port>
+      <output_port name="current_mission_state" type="std::string">当前任务状态</output_port>
+      <output_port name="current_obstacle_id" type="int">当前障碍编号</output_port>
+      <output_port name="mission_complete" type="bool">任务完成标志</output_port>
+    </Action>
+    
+    <Action ID="Somersault">
+      <input_port name="entry_pos" type="BT::Position3D">下框入口位置</input_port>
+      <input_port name="exit_pos" type="BT::Position3D">上框出口位置</input_port>
+      <input_port name="loop_radius" type="double">翻滚半径</input_port>
+      <input_port name="loop_speed" type="double">翻滚速度</input_port>
+    </Action>
+    
+    <Action ID="CircleFlag">
+      <input_port name="flag_color" type="std::string">目标刀旗颜色</input_port>
+      <input_port name="search_area" type="BT::Position3D">搜索区域中心</input_port>
+      <input_port name="circle_radius" type="double">环绕半径</input_port>
+      <input_port name="circle_speed" type="double">环绕速度</input_port>
+      <input_port name="circle_height" type="double">环绕高度</input_port>
+    </Action>
+    
+    <Action ID="DoubleFrame">
+      <input_port name="first_frame" type="BT::Position3D">第一个框位置</input_port>
+      <input_port name="second_frame" type="BT::Position3D">第二个框位置</input_port>
+      <input_port name="direction" type="std::string">穿越方向</input_port>
+      <input_port name="approach_speed" type="double">接近速度</input_port>
+    </Action>
+    
+    <Action ID="PublishObstacleComplete">
+      <input_port name="obstacle_id" type="int">完成的障碍编号</input_port>
+    </Action>
+    
+  </TreeNodesModel>
+
+</root>

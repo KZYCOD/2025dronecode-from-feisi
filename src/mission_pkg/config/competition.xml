@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="CompetitionTree">
+  <include path="takeoff.xml"/>
+  <include path="land.xml"/>
+  <include path="planner_node.xml" />
+  <include path="cross_frame.xml" />
+
+  <BehaviorTree ID="CompetitionTree">
+    <Sequence name="CompetitionSequence" _description="Complete competition obstacle course">
+      
+      <!-- 初始化参数 -->
+      <SetBlackboard name="init_params" value="false" output_key="mission_complete" />
+      <SetBlackboard name="takeoff_height" value="0.0;0.0;2.0" output_key="takeoff_goal" />
+      <SetBlackboard name="is_rc" value="0" output_key="is_rc" />
+      
+      <!-- 起飞 -->
+      <SubTree ID="takeoff" is_rc="{is_rc}" goal="{takeoff_goal}"/>
+      
+      <!-- 障碍1: 方框直穿 (obs1) -->
+      <Sequence name="Obstacle1_SquareFrame">
+        <SetBlackboard value="2.0;0.0;2.0" output_key="obs1_target" />
+        <SubTree ID="cross_frame" target_pos="{obs1_target}" frame_type="square" />
+      </Sequence>
+      
+      <!-- 障碍2: 圆框直穿 (obs2) -->
+      <Sequence name="Obstacle2_CircleFrame">
+        <SetBlackboard value="4.0;0.0;2.0" output_key="obs2_target" />
+        <SubTree ID="cross_frame" target_pos="{obs2_target}" frame_type="circle" />
+      </Sequence>
+      
+      <!-- 障碍3: 双框左进右出/右进左出 (obs3) -->
+      <Sequence name="Obstacle3_DoubleFrame">
+        <SetBlackboard value="6.0;-1.0;2.0" output_key="obs3_frame1" />
+        <SetBlackboard value="6.0;1.0;2.0" output_key="obs3_frame2" />
+        <SetBlackboard value="left_right" output_key="obs3_direction" />
+        <DoubleFrame first_frame="{obs3_frame1}" second_frame="{obs3_frame2}" direction="{obs3_direction}" approach_speed="1.0" />
+      </Sequence>
+      
+      <!-- 障碍4: 上下翻跟斗 (obs4) -->
+      <Sequence name="Obstacle4_Somersault">
+        <SetBlackboard value="8.0;0.0;1.5" output_key="obs4_entry" />
+        <SetBlackboard value="8.0;0.0;2.5" output_key="obs4_exit" />
+        <Somersault entry_pos="{obs4_entry}" exit_pos="{obs4_exit}" loop_radius="1.0" loop_speed="2.0" />
+      </Sequence>
+      
+      <!-- 障碍5: 环绕刀旗一圈 (obs5) -->
+      <Sequence name="Obstacle5_CircleFlag">
+        <SetBlackboard value="red" output_key="target_flag_color" />
+        <SetBlackboard value="9.0;0.0;2.0" output_key="flag_search_area" />
+        <CircleFlag flag_color="{target_flag_color}" search_area="{flag_search_area}" circle_radius="2.0" circle_speed="1.5" circle_height="2.0" />
+      </Sequence>
+      
+      <!-- 降落 -->
+      <Sequence name="Landing">
+        <SetBlackboard value="true" output_key="use_speed" />
+        <SetBlackboard value="-0.4" output_key="speed_z" />
+        <SubTree ID="Land" use_speed="{use_speed}" speed_z="{speed_z}" />
+      </Sequence>
+      
+      <!-- 任务完成标记 -->
+      <SetBlackboard value="true" output_key="mission_complete" />
+      
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- 行为树节点模型定义 -->
+  <TreeNodesModel>
+    <SubTree ID="takeoff" />
+    <SubTree ID="cross_frame" />
+    <SubTree ID="Land" />
+    <SubTree ID="planner" />
+    
+    <Action ID="Somersault">
+      <input_port name="entry_pos" type="BT::Position3D">下框入口位置</input_port>
+      <input_port name="exit_pos" type="BT::Position3D">上框出口位置</input_port>
+      <input_port name="loop_radius" type="double">翻滚半径</input_port>
+      <input_port name="loop_speed" type="double">翻滚速度</input_port>
+    </Action>
+    
+    <Action ID="CircleFlag">
+      <input_port name="flag_color" type="std::string">目标刀旗颜色</input_port>
+      <input_port name="search_area" type="BT::Position3D">搜索区域中心</input_port>
+      <input_port name="circle_radius" type="double">环绕半径</input_port>
+      <input_port name="circle_speed" type="double">环绕速度</input_port>
+      <input_port name="circle_height" type="double">环绕高度</input_port>
+    </Action>
+    
+    <Action ID="DoubleFrame">
+      <input_port name="first_frame" type="BT::Position3D">第一个框位置</input_port>
+      <input_port name="second_frame" type="BT::Position3D">第二个框位置</input_port>
+      <input_port name="direction" type="std::string">穿越方向</input_port>
+      <input_port name="approach_speed" type="double">接近速度</input_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>
