@@ -27,8 +27,8 @@ PortsList Somersault::providedPorts()
   return {
     InputPort<Position3D>("entry_pos", "下框入口位置"),
     InputPort<Position3D>("exit_pos", "上框出口位置"),
-    InputPort("loop_radius", 1.0, "翻滚半径"),
-    InputPort("loop_speed", 2.0, "翻滚速度")
+    InputPort<double>("loop_radius", 1.0, "翻滚半径"),
+    InputPort<double>("loop_speed", 2.0, "翻滚速度")
   };
 }
 

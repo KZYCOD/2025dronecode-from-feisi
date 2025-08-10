@@ -28,7 +28,7 @@ CompetitionScheduler::CompetitionScheduler(const std::string &name, const NodeCo
 PortsList CompetitionScheduler::providedPorts()
 {
   return {
-    InputPort("enable_emergency_stop", false, "启用紧急停止"),
+    InputPort<bool>("enable_emergency_stop", false, "启用紧急停止"),
     OutputPort<std::string>("current_mission_state", "当前任务状态"),
     OutputPort<int>("current_obstacle_id", "当前障碍编号"),
     OutputPort<bool>("mission_complete", "任务完成标志")
