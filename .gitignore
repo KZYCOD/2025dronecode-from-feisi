@@ -1,0 +1,42 @@
+# Build artifacts
+build/
+devel/
+install/
+logs/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Object files
+*.o
+*.so
+*.a
+
+# Temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# ROS generated files
+*.msg
+*.srv
+*.bag
+msg_gen/
+srv_gen/
+
+# Test files
+/tmp/
