@@ -32,10 +32,10 @@ DoubleFrame::DoubleFrame(const std::string &name, const NodeConfig &config)
 PortsList DoubleFrame::providedPorts()
 {
   return {
-    InputPort<std::string>("direction", "穿越方向: left_right 或 right_left", "left_right"),
+    InputPort("direction", std::string("left_right"), "穿越方向: left_right 或 right_left"),
     InputPort<Position3D>("first_frame", "第一个框位置"),
     InputPort<Position3D>("second_frame", "第二个框位置"),
-    InputPort<double>("approach_speed", "接近速度", 1.0)
+    InputPort("approach_speed", 1.0, "接近速度")
   };
 }
 

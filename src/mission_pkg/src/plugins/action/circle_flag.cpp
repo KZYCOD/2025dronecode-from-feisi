@@ -34,10 +34,10 @@ PortsList CircleFlag::providedPorts()
 {
   return {
     InputPort<std::string>("flag_color", "目标刀旗颜色"),
-    InputPort<Position3D>("search_area", "搜索区域中心", Position3D(5, 5, 2)),
-    InputPort<double>("circle_radius", "环绕半径", 2.0),
-    InputPort<double>("circle_speed", "环绕速度", 1.5),
-    InputPort<double>("circle_height", "环绕高度", 2.0)
+    InputPort("search_area", Position3D(5, 5, 2), "搜索区域中心"),
+    InputPort("circle_radius", 2.0, "环绕半径"),
+    InputPort("circle_speed", 1.5, "环绕速度"),
+    InputPort("circle_height", 2.0, "环绕高度")
   };
 }
 
