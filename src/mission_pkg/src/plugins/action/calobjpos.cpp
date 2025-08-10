@@ -171,7 +171,7 @@ void CalObjPos::DepthInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info)
 
 PortsList CalObjPos::providedPorts()
 {
-  return { InputPort("class_name", "we need to set object name") };
+  return { InputPort<std::string>("class_name", "we need to set object name") };
 }
 
 NodeStatus CalObjPos::onStart()
