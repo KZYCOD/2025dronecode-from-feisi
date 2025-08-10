@@ -16,8 +16,8 @@ PortsList Land::providedPorts()
 {
   const char *description =
       "Land ... You can use the speed to control, or use AUTO.LAND mode";
-  return {InputPort("use_speed", description),
-          InputPort("speed_z", "land speed")};
+  return {InputPort<int>("use_speed", description),
+          InputPort<double>("speed_z", "land speed")};
 }
 
 NodeStatus Land::tick()

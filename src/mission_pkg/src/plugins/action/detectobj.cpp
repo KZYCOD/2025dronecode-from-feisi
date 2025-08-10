@@ -21,7 +21,7 @@ DetectObj::DetectObj(const std::string &name, const NodeConfig &config)
 
 PortsList DetectObj::providedPorts()
 {
-  return { InputPort("class_name", "input class name"),
+  return { InputPort<std::string>("class_name", "input class name"),
            InputPort<bool>("stop_detect"), OutputPort<bool>("stop_hover") };
 }
 
