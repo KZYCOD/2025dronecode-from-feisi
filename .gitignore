@@ -1,0 +1,26 @@
+# Build artifacts
+build/
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+!CMakeLists.txt
+
+# IDE files
+.vscode/
+.idea/
+
+# Compiled binaries
+*.o
+*.so
+*.a
+*.exe
+
+# Temporary files
+*~
+.*.swp
+.*.swo
+
+# ROS artifacts
+devel/
+logs/
+install/
