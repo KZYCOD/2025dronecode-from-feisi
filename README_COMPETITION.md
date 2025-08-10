@@ -17,54 +17,56 @@
 - **控制模块**: MAVROS飞控接口，视觉伺服控制
 - **安全模块**: 边界检查，超时保护，紧急停止
 
-## 🚀 快速开始
+## 🚀 快速部署
 
-### 1. 环境准备
+### 一键部署（推荐）
 ```bash
-# 确保ROS环境
-source /opt/ros/noetic/setup.bash
+# 运行自动部署脚本
+./scripts/deploy_competition.sh
+```
 
-# 编译工作空间  
-cd /path/to/workspace
+### 手动部署
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+rosdep install --from-paths src --ignore-src -r -y
+
+# 2. 编译工作空间  
 catkin_make
 source devel/setup.bash
-```
 
-### 2. 运行竞赛任务
-```bash
-# 仿真测试
-roslaunch mission_pkg competition.launch use_sim:=true debug_mode:=true
-
-# 实际飞行
-roslaunch mission_pkg competition.launch use_sim:=false
-```
-
-### 3. 系统验证
-```bash
-# 运行验证脚本
+# 3. 验证系统
 ./validate_system.sh
+
+# 4. 启动竞赛任务
+roslaunch mission_pkg competition.launch use_sim:=true
 ```
 
-## 📚 详细文档
-- [系统设计文档](COMPETITION_SYSTEM_DESIGN.md) - 完整技术设计说明
-- [快速开始指南](QUICK_START_GUIDE.md) - 使用教程和示例代码
+## 📚 文档指南
 
-## 🏗️ 项目结构
-```
-├── src/mission_pkg/           # 主要任务包
-│   ├── config/               # 配置文件
-│   │   ├── competition.xml   # 竞赛行为树配置
-│   │   └── competition_params.yaml  # 参数配置
-│   ├── launch/               # 启动文件
-│   ├── include/plugins/action/  # 动作节点头文件
-│   └── src/plugins/action/   # 动作节点实现
-├── src/object_det/           # 目标检测模块
-├── src/ego-planner/          # 路径规划模块  
-├── src/faster-lio-main/      # 定位模块
-└── validate_system.sh        # 系统验证脚本
+| 文档 | 说明 | 适用对象 |
+|------|------|----------|
+| [**竞赛部署完整手册**](COMPETITION_DEPLOYMENT_MANUAL.md) | 📖 从代码到竞赛的完整部署指南 | **所有用户必读** |
+| [快速部署指南](QUICK_DEPLOYMENT_GUIDE.md) | ⚡ 快速上手和关键步骤 | 有经验用户 |
+| [系统设计文档](COMPETITION_SYSTEM_DESIGN.md) | 🏗️ 技术架构和实现细节 | 开发者 |
+| [快速开始指南](QUICK_START_GUIDE.md) | 🎯 基础使用和配置 | 初学者 |
+
+## 🎯 竞赛关键功能
+
+### YOLO目标检测
+```bash
+# 数据收集
+python3 scripts/collect_data.py
+
+# 模型训练  
+python3 scripts/train_yolo.py --config scripts/yolo_training_config.yaml
 ```
 
-## 🎯 竞赛特色功能
+### 系统监控
+```bash
+# 实时监控
+python3 scripts/competition_monitor.py
+```
 
 ### 翻滚控制 (Somersault)
 实现垂直平面内的翻滚机动，支持参数化半径和速度控制。
@@ -77,6 +79,28 @@ roslaunch mission_pkg competition.launch use_sim:=false
 
 ### 高级调度器 (CompetitionScheduler)
 状态机驱动的任务调度，提供安全监控和故障恢复。
+
+## 🏗️ 项目结构
+```
+├── COMPETITION_DEPLOYMENT_MANUAL.md  # 🔥 完整部署手册 
+├── QUICK_DEPLOYMENT_GUIDE.md         # ⚡ 快速部署指南
+├── scripts/                          # 🛠️ 部署和训练工具
+│   ├── deploy_competition.sh         #   自动部署脚本
+│   ├── train_yolo.py                 #   YOLO训练脚本
+│   ├── collect_data.py               #   数据收集工具
+│   └── competition_monitor.py        #   系统监控工具
+├── src/mission_pkg/                  # 🎯 主要任务包
+│   ├── config/                       #   配置文件
+│   │   ├── competition.xml           #   竞赛行为树配置
+│   │   └── competition_params.yaml   #   参数配置
+│   ├── launch/                       #   启动文件
+│   ├── include/plugins/action/       #   动作节点头文件
+│   └── src/plugins/action/           #   动作节点实现
+├── src/object_det/                   # 👁️ 目标检测模块
+├── src/ego-planner/                  # 🧠 路径规划模块  
+├── src/faster-lio-main/              # 📍 定位模块
+└── validate_system.sh                # ✅ 系统验证脚本
+```
 
 ## ⚠️ 安全注意事项
 1. **仿真先行**: 实际飞行前必须完成仿真验证
@@ -91,4 +115,11 @@ roslaunch mission_pkg competition.launch use_sim:=false
 - 通过系统验证脚本检查
 
 ## 📧 技术支持
-如有技术问题，请查看文档或提交Issue。
+如有技术问题，请：
+1. **首先阅读** [竞赛部署完整手册](COMPETITION_DEPLOYMENT_MANUAL.md)
+2. 运行 `./validate_system.sh` 检查系统状态
+3. 查看监控报告分析问题
+4. 提交Issue并附上详细日志
+
+---
+**祝竞赛顺利！🏆**

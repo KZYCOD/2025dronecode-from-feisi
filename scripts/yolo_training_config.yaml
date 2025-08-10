@@ -1,0 +1,185 @@
+# YOLO训练配置文件 - 竞赛障碍物检测
+# Training configuration for competition obstacle detection
+
+# 数据集配置
+dataset:
+  path: "/path/to/competition_dataset"
+  train_split: "train/images"
+  val_split: "val/images"
+  test_split: "test/images"
+  
+  # 类别定义 (根据竞赛要求)
+  classes:
+    0: "square_frame"    # obs1 - 方形框架
+    1: "circle_frame"    # obs2 - 圆形框架
+    2: "red_flag"        # obs5 - 红色刀旗
+    3: "blue_flag"       # obs5 - 蓝色刀旗
+    4: "green_flag"      # obs5 - 绿色刀旗
+    5: "yellow_flag"     # obs5 - 黄色刀旗 (备用)
+
+# 训练参数配置
+training:
+  experiment_name: "competition_v1"
+  epochs: 300
+  batch_size: 16
+  image_size: 640
+  workers: 8
+  
+  # 优化器设置
+  optimizer: "AdamW"
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  momentum: 0.937
+  
+  # 学习率调度
+  lr_scheduler: "cosine"
+  warmup_epochs: 5
+  warmup_momentum: 0.8
+  warmup_bias_lr: 0.1
+  
+  # 数据增强参数
+  hsv_h: 0.015        # 色调变化范围 (0.0-1.0)
+  hsv_s: 0.7          # 饱和度变化范围
+  hsv_v: 0.4          # 亮度变化范围
+  degrees: 45.0       # 旋转角度范围 (-degrees, +degrees)
+  translate: 0.2      # 平移范围 (fraction of image size)
+  scale: 0.5          # 缩放范围 (gain)
+  shear: 0.0          # 剪切角度范围
+  perspective: 0.0    # 透视变换范围
+  flipud: 0.0         # 上下翻转概率
+  fliplr: 0.5         # 左右翻转概率
+  mosaic: 1.0         # 马赛克增强概率
+  mixup: 0.1          # mixup增强概率
+  copy_paste: 0.0     # copy-paste增强概率
+  
+  # 损失函数权重
+  box_loss_gain: 7.5
+  cls_loss_gain: 0.5
+  dfl_loss_gain: 1.5
+  
+  # 训练控制
+  save_period: 50     # 保存检查点的间隔 (epochs)
+  patience: 100       # 早停耐心值
+  save: true          # 保存检查点
+  exist_ok: false     # 覆盖现有实验
+  
+  # 验证设置
+  val: true           # 验证
+  val_period: 1       # 验证间隔
+  
+# 验证要求
+validation:
+  min_map50: 0.80     # 最小mAP@0.5要求
+  min_map50_95: 0.50  # 最小mAP@0.5:0.95要求
+  min_precision: 0.75 # 最小精确率要求
+  min_recall: 0.70    # 最小召回率要求
+  
+  # 类别特定要求
+  class_requirements:
+    square_frame:
+      min_ap50: 0.85    # 方形框架检测要求较高
+      min_recall: 0.80
+    circle_frame:
+      min_ap50: 0.85
+      min_recall: 0.80
+    red_flag:
+      min_ap50: 0.75    # 旗帜检测相对宽松
+      min_recall: 0.70
+    blue_flag:
+      min_ap50: 0.75
+      min_recall: 0.70
+    green_flag:
+      min_ap50: 0.75
+      min_recall: 0.70
+
+# 路径配置
+paths:
+  output_dir: "./training_outputs"
+  model_backup_dir: "./model_backups"
+  log_dir: "./training_logs"
+  tensorboard_dir: "./tensorboard_logs"
+
+# 导出配置
+export:
+  formats: ["onnx", "torchscript"]  # 导出格式
+  optimize: true                    # 优化导出模型
+  half: false                       # 半精度导出
+  int8: false                       # int8量化
+  dynamic: false                    # 动态输入尺寸
+  simplify: true                    # 简化ONNX模型
+  opset: 12                         # ONNX opset版本
+
+# 推理配置 (用于部署)
+inference:
+  confidence_threshold: 0.7         # 置信度阈值
+  iou_threshold: 0.45              # NMS IoU阈值
+  max_detections: 50               # 最大检测数量
+  input_size: [640, 640]           # 输入尺寸
+  
+  # 类别特定阈值微调
+  class_confidence_thresholds:
+    square_frame: 0.75
+    circle_frame: 0.75
+    red_flag: 0.65
+    blue_flag: 0.65
+    green_flag: 0.65
+
+# 硬件配置
+hardware:
+  gpu_devices: [0]                 # 使用的GPU设备
+  mixed_precision: true            # 混合精度训练
+  deterministic: false             # 确定性训练 (影响性能)
+  benchmark: true                  # 启用CUDNN benchmark
+
+# 调试和监控
+debug:
+  plot_training_samples: true      # 绘制训练样本
+  plot_validation_samples: true    # 绘制验证样本
+  plot_metrics: true               # 绘制训练指标
+  save_train_log: true            # 保存训练日志
+  tensorboard: true               # 启用TensorBoard
+  verbose: 2                      # 详细程度 (0=silent, 1=progress bar, 2=detailed)
+
+# 特殊配置 (针对竞赛环境)
+competition_specific:
+  # 光照适应
+  lighting_adaptation:
+    indoor_weight: 0.6             # 室内数据权重
+    outdoor_weight: 0.4            # 室外数据权重
+    low_light_augmentation: true   # 低光照增强
+    
+  # 距离适应
+  distance_adaptation:
+    close_range: [1, 3]            # 近距离范围 (m)
+    medium_range: [3, 7]           # 中距离范围 (m)  
+    far_range: [7, 12]             # 远距离范围 (m)
+    range_specific_augmentation: true
+    
+  # 角度覆盖
+  viewing_angles:
+    frontal_weight: 0.4            # 正面视角权重
+    side_weight: 0.3               # 侧面视角权重
+    angled_weight: 0.3             # 倾斜视角权重
+    
+  # 遮挡处理
+  occlusion_handling:
+    partial_occlusion_training: true
+    occlusion_augmentation_rate: 0.3
+    min_visible_ratio: 0.3         # 最小可见比例
+
+# 数据质量要求
+data_quality:
+  annotation_accuracy: 0.95        # 标注准确率要求
+  annotation_consistency: 0.98     # 标注一致性要求  
+  image_quality_threshold: 0.8     # 图像质量阈值
+  
+  # 数据分布要求
+  distribution_requirements:
+    min_samples_per_class: 1500    # 每类最少样本数
+    train_val_ratio: 0.8           # 训练验证集比例
+    background_samples_ratio: 0.1  # 背景样本比例
+    
+  # 数据增强验证
+  augmentation_validation:
+    verify_augmented_labels: true  # 验证增强后的标签
+    max_augmentation_distortion: 0.3  # 最大增强扭曲度
