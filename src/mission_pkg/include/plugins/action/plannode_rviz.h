@@ -10,7 +10,7 @@
 #ifndef PLANNODE_H
 #define PLANNODE_H
 #include <plugins/common.hpp>
-#include <mavros_cnt.h>
+#include "mavros_cnt.h"
 #include <quadrotor_msgs/PositionCommand.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>

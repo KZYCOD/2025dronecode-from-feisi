@@ -24,7 +24,7 @@
 #ifndef HIT_H
 #define HIT_H
 #include "plugins/common.hpp"
-#include <mavros_cnt.h>
+#include "mavros_cnt.h"
 #include <common_msgs/Objects.h>
 #include <common_msgs/Obj.h>
 #include <sensor_msgs/PointCloud2.h>

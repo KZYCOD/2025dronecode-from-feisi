@@ -59,7 +59,7 @@ template <> inline Position3D convertFromString(StringView str)
   auto parts = splitString(str, ';');
   if(parts.size() != 3)
   {
-    throw RuntimeError("invalid input)");
+    throw RuntimeError("invalid input");
   }
   else
   {

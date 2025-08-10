@@ -1,0 +1,89 @@
+# 竞赛场地和障碍参数配置
+# Competition field and obstacle parameters configuration
+
+# 场地参数 Field Parameters
+field:
+  width: 10.0          # 场地宽度 (m)
+  length: 10.0         # 场地长度 (m)  
+  height_limit: 4.0    # 限飞高度 (m)
+  origin: [0.0, 0.0, 0.0]  # 场地原点坐标
+
+# 起降参数 Takeoff/Landing Parameters
+takeoff:
+  position: [0.0, 0.0, 2.0]  # 起飞位置
+  speed: 1.0                  # 起飞速度
+  
+landing:
+  position: [9.5, 0.0, 0.0]   # 降落位置
+  speed: -0.4                 # 降落速度
+
+# 障碍参数 Obstacle Parameters
+obstacles:
+  # obs1: 方框直穿
+  obs1_square_frame:
+    position: [2.0, 0.0, 2.0]  # 方框中心位置
+    width: 1.5                  # 方框宽度
+    height: 1.5                 # 方框高度
+    approach_distance: 1.0      # 接近距离
+    
+  # obs2: 圆框直穿  
+  obs2_circle_frame:
+    position: [4.0, 0.0, 2.0]  # 圆框中心位置
+    radius: 0.8                 # 圆框半径
+    approach_distance: 1.0      # 接近距离
+    
+  # obs3: 双框穿越
+  obs3_double_frame:
+    frame1_position: [6.0, -1.0, 2.0]  # 第一个框位置
+    frame2_position: [6.0, 1.0, 2.0]   # 第二个框位置
+    frame_width: 1.2                    # 框宽度
+    frame_height: 1.2                   # 框高度
+    traversal_direction: "left_right"   # 穿越方向: left_right 或 right_left
+    approach_speed: 1.0                 # 接近速度
+    
+  # obs4: 翻跟斗
+  obs4_somersault:
+    lower_frame_position: [8.0, 0.0, 1.5]  # 下框位置
+    upper_frame_position: [8.0, 0.0, 2.5]  # 上框位置
+    loop_radius: 1.0                        # 翻滚半径
+    loop_speed: 2.0                         # 翻滚速度 (m/s)
+    frame_width: 1.5                        # 框宽度
+    
+  # obs5: 环绕刀旗
+  obs5_flag_circle:
+    flag_position: [9.0, 0.0, 1.0]     # 刀旗位置 (估计值)
+    flag_color: "red"                   # 目标刀旗颜色
+    search_area: [9.0, 0.0, 2.0]       # 搜索区域中心
+    circle_radius: 2.0                  # 环绕半径
+    circle_speed: 1.5                   # 环绕速度 (m/s)
+    circle_height: 2.0                  # 环绕高度
+    detection_timeout: 15.0             # 检测超时时间
+
+# 飞行控制参数 Flight Control Parameters
+control:
+  position_tolerance: 0.3      # 位置到达容差 (m)
+  velocity_max: 2.0           # 最大速度 (m/s)
+  acceleration_max: 1.0       # 最大加速度 (m/s²)
+  yaw_rate_max: 30.0         # 最大偏航角速度 (deg/s)
+  
+# 安全参数 Safety Parameters  
+safety:
+  emergency_stop_height: 0.5   # 紧急停止高度 (m)
+  obstacle_avoidance: true     # 启用避障
+  timeout_general: 30.0        # 通用超时时间 (s)
+  timeout_detection: 15.0      # 检测超时时间 (s)
+  timeout_maneuver: 20.0       # 机动超时时间 (s)
+
+# 视觉检测参数 Vision Detection Parameters
+vision:
+  camera_topic: "/camera/image_raw"
+  detection_topic: "/object_detection/results" 
+  confidence_threshold: 0.7    # 检测置信度阈值
+  frame_rate: 30              # 处理帧率 (fps)
+  
+# 调试参数 Debug Parameters
+debug:
+  enable_debug: true          # 启用调试模式
+  log_level: "INFO"          # 日志级别
+  visualization: true         # 启用可视化
+  record_trajectory: true     # 记录轨迹

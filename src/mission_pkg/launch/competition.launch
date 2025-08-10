@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- 竞赛任务启动文件 Competition Mission Launch File -->
+  
+  <!-- 参数配置 -->
+  <arg name="use_sim" default="true" />
+  <arg name="debug_mode" default="true" />
+  <arg name="config_file" default="$(find mission_pkg)/config/competition_params.yaml" />
+  
+  <!-- 加载竞赛参数 -->
+  <rosparam file="$(arg config_file)" command="load" />
+  
+  <!-- MAVROS连接 (如果不是仿真环境) -->
+  <group unless="$(arg use_sim)">
+    <include file="$(find mavros)/launch/px4.launch">
+      <arg name="fcu_url" value="/dev/ttyACM0:57600" />
+      <arg name="gcs_url" value="" />
+    </include>
+  </group>
+  
+  <!-- 行为树任务节点 -->
+  <node pkg="mission_pkg" name="competition_mission" type="bt_ros" output="screen" respawn="false">
+    <param name="config_path" value="$(find mission_pkg)/config/competition.xml" type="str"/>
+    <param name="fcu_state_topic" value="/mavros/state" type="str"/>
+    <param name="fcu_pos_topic" value="/mavros/local_position/local" type="str"/>
+    <param name="pos_tgt_topic" value="/mavros/setpoint_raw/local" type="str"/>
+    <param name="set_mode_service" value="/mavros/set_mode" type="str"/>
+    <param name="arm_service" value="/mavros/cmd/arming" type="str"/>
+    <param name="is_debug" value="$(arg debug_mode)" type="bool" />
+    
+    <!-- 竞赛特定参数 -->
+    <param name="competition_mode" value="true" type="bool" />
+    <param name="field_width" value="10.0" type="double" />
+    <param name="field_length" value="10.0" type="double" />
+    <param name="field_height_limit" value="4.0" type="double" />
+  </node>
+  
+  <!-- 对象检测节点 -->
+  <node pkg="object_det" name="object_detection" type="det.py" output="screen">
+    <param name="camera_topic" value="/camera/image_raw" />
+    <param name="detection_topic" value="/object_detection/results" />
+    <param name="confidence_threshold" value="0.7" />
+  </node>
+  
+  <!-- 轨迹规划节点 (如果需要) -->
+  <include file="$(find ego_planner)/launch/ego_planner.launch" if="$(arg use_sim)">
+    <arg name="map_size_x" value="10.0" />
+    <arg name="map_size_y" value="10.0" />
+    <arg name="map_size_z" value="4.0" />
+  </include>
+  
+  <!-- RViz可视化 (调试模式) -->
+  <node pkg="rviz" type="rviz" name="competition_rviz" 
+        args="-d $(find mission_pkg)/rviz/competition.rviz" 
+        if="$(arg debug_mode)" />
+  
+  <!-- 数据记录 (可选) -->
+  <node pkg="rosbag" type="record" name="competition_recorder"
+        args="-o /tmp/competition_mission /mavros/local_position/pose /mavros/state /object_detection/results"
+        if="$(arg debug_mode)" />
+
+</launch>
