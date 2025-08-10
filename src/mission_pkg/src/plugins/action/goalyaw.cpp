@@ -23,10 +23,10 @@ GoalYaw::GoalYaw(const std::string &name, const NodeConfig &config)
 
 PortsList GoalYaw::providedPorts()
 {
-  return {InputPort("goal_yaw", "we need to control the fcu yaw"),
-          InputPort("is_set_point","if we want set point"),
-          InputPort("point","set we need point,but the is_set_point is true"),
-          InputPort("yaw_rate","use we want yaw_rate")
+  return {InputPort<double>("goal_yaw", "we need to control the fcu yaw"),
+          InputPort<bool>("is_set_point","if we want set point"),
+          InputPort<BT::Position3D>("point","set we need point,but the is_set_point is true"),
+          InputPort<double>("yaw_rate","use we want yaw_rate")
   };
 }
 

@@ -81,14 +81,14 @@ Hit::Hit(const std::string &name, const NodeConfig &config)
 PortsList Hit::providedPorts()
 {
 
-  return {InputPort("object_name", "input hitted object"),
-          InputPort("method", "hit object method,direct or other"),
-          InputPort("hit_dist","when the to object distane less the value"),
-          InputPort("goal_tolerance","the value greate than obj_inflate ande less than his_dist"),
-          InputPort("needle_ang_adapt","the value to adapt the needle fixed angle"),
-          InputPort("left_line","no discript"),
-          InputPort("right_line","no discript"),
-          InputPort("yaw_err","when the object's yaw subtract fcu's yaw lees than value ,considered equ")           
+  return {InputPort<std::string>("object_name", "input hitted object"),
+          InputPort<int>("method", "hit object method,direct or other"),
+          InputPort<double>("hit_dist","when the to object distane less the value"),
+          InputPort<double>("goal_tolerance","the value greate than obj_inflate ande less than his_dist"),
+          InputPort<double>("needle_ang_adapt","the value to adapt the needle fixed angle"),
+          InputPort<int>("left_line","no discript"),
+          InputPort<int>("right_line","no discript"),
+          InputPort<double>("yaw_err","when the object's yaw subtract fcu's yaw lees than value ,considered equ")           
           };
 }
 

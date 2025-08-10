@@ -40,8 +40,8 @@ PlanNodeRviz::PlanNodeRviz(const std::string name, const NodeConfiguration &conf
 
 PortsList PlanNodeRviz::providedPorts()
 {
-  return { InputPort("enable_planner", "open or close planner"),
-           InputPort("planner_ctrl_type",
+  return { InputPort<bool>("enable_planner", "open or close planner"),
+           InputPort<int>("planner_ctrl_type",
                      "choose the control type,0:pose,1:volicty,2:accelerate") };
 }
 

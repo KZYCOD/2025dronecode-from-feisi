@@ -108,9 +108,9 @@ void CrossFrame::RecvObj(const common_msgs::Objects::ConstPtr &msg)
 
 PortsList CrossFrame::providedPorts()
 {
-  return {InputPort("object_name", "we need cross frame name"),
-          InputPort("ctrl_type", "0: just use Visual servo; 1: use planner"),
-          InputPort("ctrl_speed", "set corss frame speed")
+  return {InputPort<std::string>("object_name", "we need cross frame name"),
+          InputPort<int>("ctrl_type", "0: just use Visual servo; 1: use planner"),
+          InputPort<double>("ctrl_speed", "set corss frame speed")
 
   };
 }

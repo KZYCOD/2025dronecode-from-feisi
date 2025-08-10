@@ -15,7 +15,7 @@ PortsList Takeoff::providedPorts()
 {
   const char *description = "Takeoff position ... ";
   return {InputPort<Position3D>("goal", description),
-          InputPort("is_rc", "is remote controller operator")};
+          InputPort<int>("is_rc", "is remote controller operator")};
 }
 
 NodeStatus Takeoff::tick()

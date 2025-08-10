@@ -30,14 +30,14 @@ PlanNode::PlanNode(const std::string name, const NodeConfiguration &config)
 
 PortsList PlanNode::providedPorts()
 {
-  return {InputPort("goal_position", "the goal position"),
-          InputPort("goal_ori", "the goal orientation, [roll, pitch, yaw]"),
-          InputPort("enabel_planner", "open or close planner"),
-          InputPort("planner_ctrl_type",
+  return {InputPort<Position3D>("goal_position", "the goal position"),
+          InputPort<Position3D>("goal_ori", "the goal orientation, [roll, pitch, yaw]"),
+          InputPort<bool>("enabel_planner", "open or close planner"),
+          InputPort<int>("planner_ctrl_type",
                     "choose the control type,0:pose,1:volicty,2:accelerate"),
-          InputPort("goal_src", "0: xml set; 1:program inner;3: rviz"),
-          InputPort("enabel_yaw", "use trajectory yaw"),
-          InputPort("enabel_yaw_rate", "use trajecotry yaw_rate")};      
+          InputPort<int>("goal_src", "0: xml set; 1:program inner;3: rviz"),
+          InputPort<bool>("enabel_yaw", "use trajectory yaw"),
+          InputPort<bool>("enabel_yaw_rate", "use trajecotry yaw_rate")};      
 }
 
 void PlanNode::PositionCmdCB(
